@@ -1,0 +1,38 @@
+import { Prop, Schema, SchemaFactory, SchemaOptions } from '@nestjs/mongoose';
+import { IsEmail, MaxLength } from 'class-validator';
+import { Document } from 'mongoose';
+
+export type UserDocument = User & Document;
+
+const options: SchemaOptions = {
+  timestamps: true,
+  collection: 'user',
+};
+
+@Schema(options)
+export class User {
+  @Prop({ require: true })
+  @IsEmail()
+  email: string;
+
+  @Prop({ require: true })
+  password: string;
+
+  @Prop({ require: true })
+  @MaxLength(20)
+  name: string;
+
+  @Prop()
+  refreshToken: string;
+
+  readonly readOnlyData: { email: string; name: string };
+}
+
+export const UserSchema = SchemaFactory.createForClass(User);
+
+UserSchema.virtual('readOnlyData').get(function (this: User) {
+  return {
+    email: this.email,
+    name: this.name,
+  };
+});
