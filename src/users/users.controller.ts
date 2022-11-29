@@ -61,7 +61,6 @@ export class UsersController {
   //   console.log(typeof param);
   //   return 'test';
   // }
-
   @Post()
   create(@Body() createUserDto: UserRequestDto) {
     return this.usersService.create(createUserDto);
