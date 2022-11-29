@@ -9,6 +9,7 @@ import * as argon2 from 'argon2';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { AuthDto } from './dto/auth.request.dto';
+import { AuthDto2 } from './dto/auth.request2.dto';
 
 @Injectable()
 export class AuthService {
@@ -47,6 +48,11 @@ export class AuthService {
       throw new BadRequestException('Password is incorrect');
     const tokens = await this.getTokens(user._id, user.email);
     await this.updateRefreshToken(user._id, tokens.refreshToken);
+    return tokens;
+  }
+
+  async login(data: AuthDto2) {
+    const tokens = await this.getTokens(data.socialToken, data.type);
     return tokens;
   }
 

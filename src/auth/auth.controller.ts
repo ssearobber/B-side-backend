@@ -20,29 +20,48 @@ import { LoggingInterceptor } from '../common/interceptors/logging.interceptor';
 import { UserRequestDto } from '../users/\bdto/users.request.dto';
 import { AuthService } from './auth.service';
 import { AuthDto } from './dto/auth.request.dto';
+import { AuthDto2 } from './dto/auth.request2.dto';
 
 @Controller('auth')
 @UseInterceptors(LoggingInterceptor)
 export class AuthController {
   constructor(private authService: AuthService) {}
 
-  @ApiOperation({ summary: '회원가입' })
-  @ApiResponse({
-    status: 500,
-    description: 'Server Error',
-  })
-  @ApiResponse({
-    status: 400,
-    description: 'email already exists',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'success',
-  })
-  @Post('signup')
-  signup(@Body() createUserDto: UserRequestDto) {
-    return this.authService.signUp(createUserDto);
-  }
+  // @ApiOperation({ summary: '회원가입' })
+  // @ApiResponse({
+  //   status: 500,
+  //   description: 'Server Error',
+  // })
+  // @ApiResponse({
+  //   status: 403,
+  //   description: 'email already exists',
+  // })
+  // @ApiResponse({
+  //   status: 200,
+  //   description: 'success',
+  // })
+  // @Post('signup')
+  // signup(@Body() createUserDto: UserRequestDto) {
+  //   return this.authService.signUp(createUserDto);
+  // }
+
+  // @ApiOperation({ summary: '로그인' })
+  // @ApiResponse({
+  //   status: 500,
+  //   description: 'Server Error',
+  // })
+  // @ApiResponse({
+  //   status: 400,
+  //   description: 'User does not exist , Password is incorrect',
+  // })
+  // @ApiResponse({
+  //   status: 200,
+  //   description: 'success',
+  // })
+  // @Post('signin')
+  // signin(@Body() data: AuthDto) {
+  //   return this.authService.signIn(data);
+  // }
 
   @ApiOperation({ summary: '로그인' })
   @ApiResponse({
@@ -51,15 +70,15 @@ export class AuthController {
   })
   @ApiResponse({
     status: 400,
-    description: 'User does not exist , Password is incorrect',
+    description: 'Client Error',
   })
   @ApiResponse({
     status: 200,
     description: 'success',
   })
-  @Post('signin')
-  signin(@Body() data: AuthDto) {
-    return this.authService.signIn(data);
+  @Post('login')
+  login(@Body() data: AuthDto2) {
+    return this.authService.login(data);
   }
 
   @ApiOperation({ summary: '로그아웃' })
