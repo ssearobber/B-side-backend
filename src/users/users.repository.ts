@@ -26,12 +26,25 @@ export class UsersRepository {
     return await this.userModel.create(user);
   }
 
+  async findOneAndUpdate(filter: object, update: object) {
+    return await this.userModel.findOneAndUpdate(filter, update, {
+      news: true,
+    });
+  }
+
   async findAll(): Promise<UserDocument[]> {
     return this.userModel.find().exec();
   }
 
   async findById(id: string): Promise<UserDocument> {
     return this.userModel.findById(id);
+  }
+
+  async findByKakaoId(id: string): Promise<UserDocument> {
+    return this.userModel.findOne({ id }).exec();
+  }
+  async findByRefreshToken(refreshToken: string): Promise<UserDocument> {
+    return this.userModel.findOne({ refreshToken }).exec();
   }
 
   async findByUsername(email: string): Promise<UserDocument> {

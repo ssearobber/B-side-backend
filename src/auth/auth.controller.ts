@@ -17,9 +17,7 @@ import { Request } from 'express';
 import { AccessTokenGuard } from '../common/guards/accessToken.guard';
 import { RefreshTokenGuard } from '../common/guards/refreshToken.guard';
 import { LoggingInterceptor } from '../common/interceptors/logging.interceptor';
-import { UserRequestDto } from '../users/\bdto/users.request.dto';
 import { AuthService } from './auth.service';
-import { AuthDto } from './dto/auth.request.dto';
 import { AuthDto2 } from './dto/auth.request2.dto';
 
 @Controller('auth')
@@ -63,6 +61,40 @@ export class AuthController {
   //   return this.authService.signIn(data);
   // }
 
+  // @ApiOperation({ summary: 'refreshToken을 재발급' })
+  // @ApiBearerAuth('access-token')
+  // @ApiResponse({
+  //   status: 500,
+  //   description: 'Server Error',
+  // })
+  // @ApiResponse({
+  //   status: 200,
+  //   description: 'success',
+  // })
+  // @UseGuards(RefreshTokenGuard)
+  // @Get('refresh')
+  // refreshTokens(@Req() req: Request) {
+  //   const userId = req.user['sub'];
+  //   const refreshToken = req.user['refreshToken'];
+  //   return this.authService.refreshTokens(userId, refreshToken);
+  // }
+
+  // @ApiOperation({ summary: '로그아웃' })
+  // @ApiBearerAuth('access-token')
+  // @ApiResponse({
+  //   status: 500,
+  //   description: 'Server Error',
+  // })
+  // @ApiResponse({
+  //   status: 200,
+  //   description: 'success',
+  // })
+  // @UseGuards(AccessTokenGuard)
+  // @Get('logout')
+  // logout(@Req() req: Request) {
+  //   this.authService.logout(req.user['sub']);
+  // }
+
   @ApiOperation({ summary: '로그인' })
   @ApiResponse({
     status: 500,
@@ -81,8 +113,8 @@ export class AuthController {
     return this.authService.login(data);
   }
 
-  @ApiOperation({ summary: '로그아웃' })
-  @ApiBearerAuth('access-token')
+  @ApiOperation({ summary: 'accessToken을 재발급' })
+  // @ApiBearerAuth('access-token')
   @ApiResponse({
     status: 500,
     description: 'Server Error',
@@ -91,27 +123,10 @@ export class AuthController {
     status: 200,
     description: 'success',
   })
-  @UseGuards(AccessTokenGuard)
-  @Get('logout')
-  logout(@Req() req: Request) {
-    this.authService.logout(req.user['sub']);
-  }
-
-  @ApiOperation({ summary: 'refreshToken을 재발급' })
-  @ApiBearerAuth('access-token')
-  @ApiResponse({
-    status: 500,
-    description: 'Server Error',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'success',
-  })
-  @UseGuards(RefreshTokenGuard)
-  @Get('refresh')
-  refreshTokens(@Req() req: Request) {
-    const userId = req.user['sub'];
-    const refreshToken = req.user['refreshToken'];
-    return this.authService.refreshTokens(userId, refreshToken);
+  // @UseGuards(RefreshTokenGuard)
+  @Post('accesstoken')
+  accessToken(@Req() req: Request) {
+    const refreshToken = req.headers.authorization;
+    return this.authService.getAccessTokenByRefreshToken(refreshToken);
   }
 }

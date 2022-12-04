@@ -30,15 +30,35 @@ export class UsersService {
   // }
 
   async create(createUserDto: UserRequestDto): Promise<UserDocument> {
-    const createdUser = this.usersRepository.create(createUserDto);
+    const createdUser = await this.usersRepository.create(createUserDto);
     return createdUser;
   }
+
+  async findOneAndUpdate(
+    filter: object,
+    update: object,
+  ): Promise<UserDocument> {
+    const updateRefreshToken = await this.usersRepository.findOneAndUpdate(
+      filter,
+      update,
+    );
+    return updateRefreshToken;
+  }
+
   async findAll(): Promise<UserDocument[]> {
     return this.usersRepository.findAll();
   }
 
   async findById(id: string): Promise<UserDocument> {
     return this.usersRepository.findById(id);
+  }
+
+  async findByKakaoId(id: string): Promise<UserDocument> {
+    return this.usersRepository.findByKakaoId(id);
+  }
+
+  async findByRefreshToken(refreshToken: string): Promise<UserDocument> {
+    return this.usersRepository.findByRefreshToken(refreshToken);
   }
 
   async findByUsername(email: string): Promise<UserDocument> {

@@ -7,9 +7,10 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { AccessTokenStrategy } from './jwt/strategies/accessToken.strategy';
 import { RefreshTokenStrategy } from './jwt/strategies/refreshToken.strategy';
+import { HttpModule } from '@nestjs/axios';
 
 @Module({
-  imports: [UsersModule, JwtModule.register({})],
+  imports: [UsersModule, JwtModule.register({}), HttpModule],
   controllers: [AuthController],
   providers: [
     AuthService,

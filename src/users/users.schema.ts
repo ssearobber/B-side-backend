@@ -12,14 +12,13 @@ const options: SchemaOptions = {
 @Schema(options)
 export class User {
   @Prop({ require: true })
+  id: string;
+
   @IsEmail()
   email: string;
 
-  @Prop({ require: true })
   password: string;
 
-  @Prop({ require: true })
-  @MaxLength(20)
   name: string;
 
   @Prop()

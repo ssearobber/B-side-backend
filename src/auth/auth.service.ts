@@ -3,13 +3,14 @@ import {
   ForbiddenException,
   Injectable,
 } from '@nestjs/common';
-import { UserRequestDto } from 'src/users/\bdto/users.request.dto';
 import { UsersService } from 'src/users/users.service';
 import * as argon2 from 'argon2';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { AuthDto } from './dto/auth.request.dto';
 import { AuthDto2 } from './dto/auth.request2.dto';
+import { UserRequestDto } from '../users/\bdto/users.request.dto';
+import { HttpService } from '@nestjs/axios';
 
 @Injectable()
 export class AuthService {
@@ -17,6 +18,7 @@ export class AuthService {
     private usersService: UsersService,
     private jwtService: JwtService,
     private configService: ConfigService,
+    private readonly httpService: HttpService,
   ) {}
 
   async signUp(createUserDto: UserRequestDto): Promise<any> {
@@ -53,6 +55,20 @@ export class AuthService {
 
   async login(data: AuthDto2) {
     const tokens = await this.getTokens(data.socialToken, data.type);
+    switch (data.type) {
+      case 'kakao': {
+        await this.getUserByKakaoAccessToken(
+          data.socialToken,
+          tokens.refreshToken,
+        );
+        break;
+      }
+      case 'apple': {
+      }
+      default: {
+        // throw new InvalidVendorNameException(); //소셜로그인 선택 실패 예외처리
+      }
+    }
     return tokens;
   }
 
@@ -69,6 +85,20 @@ export class AuthService {
     await this.usersService.update(userId, {
       refreshToken: hashedRefreshToken,
     });
+  }
+
+  async refreshTokens(userId: string, refreshToken: string) {
+    const user = await this.usersService.findById(userId);
+    if (!user || !user.refreshToken)
+      throw new ForbiddenException('Access Denied');
+    const refreshTokenMatches = await argon2.verify(
+      user.refreshToken,
+      refreshToken,
+    );
+    if (!refreshTokenMatches) throw new ForbiddenException('Access Denied');
+    const tokens = await this.getTokens(user.id, user.email);
+    await this.updateRefreshToken(user.id, tokens.refreshToken);
+    return tokens;
   }
 
   async getTokens(userId: string, email: string) {
@@ -101,17 +131,69 @@ export class AuthService {
     };
   }
 
-  async refreshTokens(userId: string, refreshToken: string) {
-    const user = await this.usersService.findById(userId);
-    if (!user || !user.refreshToken)
-      throw new ForbiddenException('Access Denied');
-    const refreshTokenMatches = await argon2.verify(
-      user.refreshToken,
-      refreshToken,
-    );
-    if (!refreshTokenMatches) throw new ForbiddenException('Access Denied');
-    const tokens = await this.getTokens(user.id, user.email);
-    await this.updateRefreshToken(user.id, tokens.refreshToken);
-    return tokens;
+  async getUserByKakaoAccessToken(
+    accessToken: string,
+    refreshToken: string,
+  ): Promise<string> {
+    try {
+      const user = await this.httpService
+        .get('https://kapi.kakao.com/v2/user/me', {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        })
+        .toPromise();
+      const userId = await this.usersService.findByKakaoId(user.data.id);
+
+      if (!userId) {
+        const createUserDto: UserRequestDto = new UserRequestDto();
+        createUserDto.id = user.data.id;
+        createUserDto.refreshToken = refreshToken;
+        const newUser = await this.usersService.create({
+          ...createUserDto,
+        }); // 회원이 없으면 회원가입 후 아이디 반환
+        return newUser.id;
+      } else {
+        const filter = { id: user.data.id };
+        const update = { refreshToken };
+        const updateRefreshToken = await this.usersService.findOneAndUpdate(
+          filter,
+          update,
+        ); // 회원이 있으면 RefreshToken만 갱신
+        console.log('updateRefreshToken', updateRefreshToken);
+      }
+      return userId.id; // 회원이 이미 있다면 있는 유저의 아이디 반환
+    } catch (e) {
+      console.error(e);
+      return e;
+    }
+    // KAKAO LOGIN 회원조회 REST-API
+    // const user = await axios.get('https://kapi.kakao.com/v2/user/me', {
+    //   headers: { Authorization: `Bearer ${accessToken}` },
+    // });
+    // // if (!user) throw new KakaoOAuthFailedException(); //카카오 로그인 실패 예외처리
+    // console.log('userKakao', user);
+    // const userId = await this.usersService.findById(user.data.id);
+    // const createUserDto: UserRequestDto = new UserRequestDto();
+    // createUserDto.id = user.data.id;
+    // if (!userId) {
+    //   const newUser = await this.usersService.create({
+    //     ...createUserDto,
+    //   }); // 회원이 없으면 회원가입 후 아이디 반환
+    //   return newUser.id;
+    // }
+    // return userId.id; // 회원이 이미 있다면 있는 유저의 아이디 반환
+  }
+
+  async getAccessTokenByRefreshToken(refreshToken: string) {
+    const result = await this.usersService.findByRefreshToken(refreshToken);
+    console.log('result', result);
+    if (!result) throw new ForbiddenException('Access Denied');
+
+    if (result.refreshToken === refreshToken) {
+      const accessToken = 'sadfdf2342fs';
+      return {
+        accessToken,
+        refreshToken,
+      };
+    }
   }
 }

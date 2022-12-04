@@ -3,9 +3,16 @@ import { IsEmail, IsNotEmpty } from 'class-validator';
 
 export class UserRequestDto {
   @ApiProperty({
+    example: '12341',
+    description: 'sns id',
+    required: true,
+  })
+  @IsNotEmpty()
+  id: string;
+
+  @ApiProperty({
     example: 'aaa@gmail.com',
     description: 'email',
-    required: true,
   })
   @IsEmail()
   @IsNotEmpty()
@@ -14,7 +21,6 @@ export class UserRequestDto {
   @ApiProperty({
     example: 'bside123!',
     description: 'password',
-    required: true,
   })
   @IsNotEmpty()
   password: string;
@@ -22,7 +28,6 @@ export class UserRequestDto {
   @ApiProperty({
     example: 'bisde',
     description: '유저 이름',
-    required: true,
   })
   @IsNotEmpty()
   name: string;
