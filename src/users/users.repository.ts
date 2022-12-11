@@ -40,8 +40,8 @@ export class UsersRepository {
     return this.userModel.findById(id);
   }
 
-  async findByKakaoId(id: string): Promise<UserDocument> {
-    return this.userModel.findOne({ id }).exec();
+  async findByUserId(type: string, email: string): Promise<UserDocument> {
+    return this.userModel.findOne({ type, email }).exec();
   }
   async findByRefreshToken(refreshToken: string): Promise<UserDocument> {
     return this.userModel.findOne({ refreshToken }).exec();

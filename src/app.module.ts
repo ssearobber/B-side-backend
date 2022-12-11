@@ -4,11 +4,9 @@ import { AppService } from './app.service';
 
 import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule } from '@nestjs/config';
-import { UsersController } from './users/users.controller';
 import { UsersModule } from './users/users.module';
 import { LoggerMiddleware } from './common/middlewares/logger.middleware';
 import mongoose from 'mongoose';
-import { UsersService } from './users/users.service';
 import { AuthModule } from './auth/auth.module';
 
 @Module({

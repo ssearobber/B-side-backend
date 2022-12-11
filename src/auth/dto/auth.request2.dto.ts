@@ -12,6 +12,15 @@ export class AuthDto2 {
   socialToken: string;
 
   @ApiProperty({
+    example: 'aaa@gmail.com',
+    description: 'email',
+    required: true,
+  })
+  @IsEmail()
+  @IsNotEmpty()
+  email: string;
+
+  @ApiProperty({
     example: 'kakao',
     description: 'sns type',
     required: true,

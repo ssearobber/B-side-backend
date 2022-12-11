@@ -53,8 +53,8 @@ export class UsersService {
     return this.usersRepository.findById(id);
   }
 
-  async findByKakaoId(id: string): Promise<UserDocument> {
-    return this.usersRepository.findByKakaoId(id);
+  async findByUserId(type: string, email: string): Promise<UserDocument> {
+    return this.usersRepository.findByUserId(type, email);
   }
 
   async findByRefreshToken(refreshToken: string): Promise<UserDocument> {

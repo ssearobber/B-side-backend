@@ -18,6 +18,9 @@ export class UserRequestDto {
   @IsNotEmpty()
   email: string;
 
+  @IsNotEmpty()
+  type: string;
+
   @ApiProperty({
     example: 'bside123!',
     description: 'password',

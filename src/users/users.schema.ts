@@ -11,9 +11,13 @@ const options: SchemaOptions = {
 
 @Schema(options)
 export class User {
-  @Prop({ require: true })
-  id: string;
+  // @Prop({ require: true })
+  // id: string;
 
+  @Prop()
+  type: string;
+
+  @Prop()
   @IsEmail()
   email: string;
 

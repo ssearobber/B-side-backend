@@ -64,6 +64,12 @@ export class AuthService {
         break;
       }
       case 'apple': {
+        await this.createAndUpdateUser(
+          'apple',
+          data.email,
+          tokens.refreshToken,
+        );
+        break;
       }
       default: {
         // throw new InvalidVendorNameException(); //소셜로그인 선택 실패 예외처리
@@ -141,18 +147,36 @@ export class AuthService {
           headers: { Authorization: `Bearer ${accessToken}` },
         })
         .toPromise();
-      const userId = await this.usersService.findByKakaoId(user.data.id);
+      console.log('user.data', user.data.kakao_account.email);
+
+      const userId = await this.createAndUpdateUser(
+        'kakao',
+        user.data.kakao_account.email,
+        refreshToken,
+      );
+
+      return userId; // 회원이 이미 있다면 있는 유저의 아이디 반환
+    } catch (e) {
+      console.error(e);
+      return e;
+    }
+  }
+
+  async createAndUpdateUser(type: string, email: string, refreshToken: string) {
+    try {
+      const userId = await this.usersService.findByUserId(type, email);
 
       if (!userId) {
         const createUserDto: UserRequestDto = new UserRequestDto();
-        createUserDto.id = user.data.id;
+        createUserDto.type = type;
+        createUserDto.email = email;
         createUserDto.refreshToken = refreshToken;
         const newUser = await this.usersService.create({
           ...createUserDto,
         }); // 회원이 없으면 회원가입 후 아이디 반환
         return newUser.id;
       } else {
-        const filter = { id: user.data.id };
+        const filter = { type: type, email: email };
         const update = { refreshToken };
         const updateRefreshToken = await this.usersService.findOneAndUpdate(
           filter,
@@ -165,22 +189,6 @@ export class AuthService {
       console.error(e);
       return e;
     }
-    // KAKAO LOGIN 회원조회 REST-API
-    // const user = await axios.get('https://kapi.kakao.com/v2/user/me', {
-    //   headers: { Authorization: `Bearer ${accessToken}` },
-    // });
-    // // if (!user) throw new KakaoOAuthFailedException(); //카카오 로그인 실패 예외처리
-    // console.log('userKakao', user);
-    // const userId = await this.usersService.findById(user.data.id);
-    // const createUserDto: UserRequestDto = new UserRequestDto();
-    // createUserDto.id = user.data.id;
-    // if (!userId) {
-    //   const newUser = await this.usersService.create({
-    //     ...createUserDto,
-    //   }); // 회원이 없으면 회원가입 후 아이디 반환
-    //   return newUser.id;
-    // }
-    // return userId.id; // 회원이 이미 있다면 있는 유저의 아이디 반환
   }
 
   async getAccessTokenByRefreshToken(refreshToken: string) {
