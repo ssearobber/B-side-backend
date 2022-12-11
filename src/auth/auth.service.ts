@@ -61,6 +61,11 @@ export class AuthService {
           data.socialToken,
           tokens.refreshToken,
         );
+        await this.createAndUpdateUser(
+          'kakao',
+          data.email,
+          tokens.refreshToken,
+        );
         break;
       }
       case 'apple': {
@@ -149,13 +154,7 @@ export class AuthService {
         .toPromise();
       console.log('user.data', user.data.kakao_account.email);
 
-      const userId = await this.createAndUpdateUser(
-        'kakao',
-        user.data.kakao_account.email,
-        refreshToken,
-      );
-
-      return userId; // 회원이 이미 있다면 있는 유저의 아이디 반환
+      return null; // 회원이 이미 있다면 있는 유저의 아이디 반환
     } catch (e) {
       console.error(e);
       return e;
@@ -176,7 +175,7 @@ export class AuthService {
         }); // 회원이 없으면 회원가입 후 아이디 반환
         return newUser.id;
       } else {
-        const filter = { type: type, email: email };
+        const filter = { type, email };
         const update = { refreshToken };
         const updateRefreshToken = await this.usersService.findOneAndUpdate(
           filter,
